@@ -1,28 +1,46 @@
 {% extends 'base.html.twig' %}
 
 {% form_theme form _self %}
-    {% block _news_attachments_item_widget %}
-       <tr>
-            <td>
-                {{ form_label(prototype.name, null, {label_attr: {class: 'sr-only' }} ) }}
-                {{ form_widget(prototype.name) }}
-            </td>
-            <td>
-                {{ form_label(prototype.file, null, {label_attr: {class: 'sr-only' }} ) }}
-                {{ form_widget(prototype.file) }}
-            </td>
-            <td>
-                <a href="#" class="btn btn-xs btn-danger js-row-remove">
-                    <i class="fa fa-trash" aria-hidden="true"></i>
-                    Remove
-                </a>
-            </td>
-        </tr>
-    {% endblock %}
+
+{% block _news_attachments_entry_file_widget %}
+    {% if data %}
+        {{ data }}
+    {% else %}
+        {{ block('form_widget') }}
+    {% endif %}
+{% endblock _news_attachments_entry_file_widget %}
+
+{% macro attachment_row(form) %}
+    <tr>
+        <td>
+            {{ form_label(form.name, null, {label_attr: {class: 'sr-only' }} ) }}
+            {{ form_widget(form.name) }}
+        </td>
+        <td>
+            {{ form_label(form.file, null, {label_attr: {class: 'sr-only' }} ) }}
+            {{ form_widget(form.file) }}
+        </td>
+        <td>
+            <a href="#" class="btn btn-xs btn-danger js-row-remove">
+                <i class="fa fa-trash" aria-hidden="true"></i>
+                Remove
+            </a>
+        </td>
+    </tr>
+{% endmacro %}
+
+{% block _news_attachments_entry_row %}
+    {{ _self.attachment_row(form) }}
+{% endblock %}
+
+{% block _news_attachments_item_widget_prototype %}
+    {{ _self.attachment_row(prototype) }}
+{% endblock %}
+
 
     {% block _news_attachments_widget %}
         {% if prototype is defined %}
-            {% set attr = attr|merge({'data-prototype' : block('_news_attachments_item_widget')}) %}
+            {% set attr = attr|merge({'data-prototype' : block('_news_attachments_item_widget_prototype')}) %}
         {% endif %}
         <table {{ block('widget_container_attributes') }}>
             <thead>
@@ -32,10 +50,7 @@
                 </th>
                 {% endfor %}
                 <th>
-                    <label class="col-sm-2 control-label" for="">Usuń</label>
-                </th>
-                <th>
-                    <a class="btn btn-default btn-add js-row-add" href="#">
+                    <a class="btn btn-default btn-add btn-xs js-row-add" href="#">
                         <i class="fa fa-minus" aria-hidden="true"></i>
                         Dodaj Załącznik
                     </a>
@@ -43,30 +58,9 @@
             </thead>
             
             <tbody>
-                {% for row in form %}
-                <tr>
-                    <td>
-                        {{ form_label(row.name, null, {label_attr: {class: 'sr-only' }} ) }}
-                        {{ form_widget(row.name) }}
-                    </td>
-                    <td>
-                        {{ row.file.vars['data'] }}
-                    </td>
-                    <td>
-                        <a href="#" class="btn btn-xs btn-danger js-row-remove">
-                            <i class="fa fa-trash" aria-hidden="true"></i>
-                            Remove
-                        </a>
-                    </td>
-                </tr>
-                {% endfor %}
+                 {{ block('form_rows') }}
             </tbody>
         </table>
-        {% if form.vars.data %}
-            <script>
-                var json_attachments = '{{ form.vars.data|json_encode()|raw }}';
-            </script>
-        {% endif %}
     {% endblock %}
 
 
